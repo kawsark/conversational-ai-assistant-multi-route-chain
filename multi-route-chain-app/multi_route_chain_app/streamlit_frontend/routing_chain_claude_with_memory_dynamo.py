@@ -137,10 +137,17 @@ if not 'chat_history_list' in st.session_state:
 with st.sidebar:
     chat_history_list = st.session_state['chat_history_list']
     chat_history_key = st.selectbox('Choose a chat', chat_history_list, chat_history_list.index(st.session_state.session_name))
-    if st.button("Delete chat", type="primary"):
+    if st.button("Delete current chat", type="primary"):
         memory_table.delete_item(Key={ 'SessionId': chat_history_key })
         chat_history_list.remove(chat_history_key)
         st.session_state['chat_history_list'] = chat_history_list
+        if chat_history_key == st.session_state.session_name:
+            del st.session_state['chat_history_list']
+        st.rerun()
+    if st.button("Delete all chats", type="primary"):
+        for item in chat_history_list:
+            memory_table.delete_item(Key={ 'SessionId': item })
+        del st.session_state['chat_history_list']
         st.rerun()
 
 msgs = DynamoDBChatMessageHistory(table_name=memory_table_name, session_id=chat_history_key)
